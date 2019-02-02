@@ -1,0 +1,68 @@
+/*  main.c  - main */
+
+#include <xinu.h>
+#define	roundpage(x)	(char *)( (4095 + (uint32)(x)) & (~4095) )
+void test_func(){
+
+	kprintf("TEST THE VCREATE FUNC\n");
+	int i = 0;
+	int *p = getmem(sizeof(int));
+	p = &i;
+	kprintf("X = %d\n",*p);
+	char *pointer = NULL;
+	pointer = vmalloc(2 * PAGE_SIZE);
+	kprintf("first VIRT ADDRESS: %d\n",pointer);
+	pointer[0 * PAGE_SIZE ] = 'A';
+	pointer[1 * PAGE_SIZE ] = 'B';
+	kprintf("PDBR: %d\n",proctab[currpid].PDBR);
+	if(pointer[0 * PAGE_SIZE] == 'A' && pointer[1 * PAGE_SIZE] == 'B')
+		kprintf("******************************PASS******************************\n");
+	//char *pointer1 = NULL;
+	//pointer1 = vmalloc(200);
+	//kprintf("first VIRT ADDRESS: %d\n",pointer1);
+	//char *pointer2 = NULL;
+	//pointer2 = vmalloc(10000);
+	//kprintf("first VIRT ADDRESS: %d\n",pointer2);
+	//char *pointer3 = NULL;
+	//pointer3 = vmalloc(2);
+	//kprintf("first VIRT ADDRESS: %d\n",pointer3);
+	//char *pointer4 = NULL;
+	//pointer4 = vmalloc(195 * 4096);
+	//kprintf("first VIRT ADDRESS: %d\n",pointer4);
+	//sleepms(500000000);
+	//char *ptr1 = NULL;
+	//ptr1 = getmem(sizeof(char))
+	//write_cr3(proctab[NULLPROC].PDBR);
+	//pd_t *pg_dir = (pd_t *)proctab[currpid].PDBR;
+	//pg_dir = (pd_t *)((8192 + 5) * PAGE_SIZE); 
+	//kprintf("%d\n",read_cr3());
+	//for(i = 0; i< 15; i++){
+	//	kprintf("%d\n",(pg_dir + i)->pd_pres);
+	//}
+	//write_cr3(proctab[currpid].PDBR);
+
+}
+process	main(void)
+{
+
+	/* Run the Xinu shell */
+	pid32 p1 = vcreate(test_func, 2000, 200, 60, "test1", 0, 0, 0);
+	resume(p1);
+	//pid32 p2 = vcreate(test_func, 2000, 4096, 60, "test1", 0, 0, 0);
+	//resume(p2);
+	//kprintf("*----------------------------------------------------------\n");
+	//kprintf("%d\n",roundpage(4097));
+	recvclr();
+	resume(create(shell, 8192, 50, "shell", 1, CONSOLE));
+
+	/* Wait for shell to exit and recreate it */
+
+	while (TRUE) {
+		receive();
+		sleepms(200);
+		kprintf("\n\nMain process recreating shell\n\n");
+		resume(create(shell, 4096, 20, "shell", 1, CONSOLE));
+	}
+	return OK;
+    
+}
