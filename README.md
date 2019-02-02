@@ -1,6 +1,6 @@
 # Virtual-Memory-Management-System-in-Xinu-OS
 
-Language: 
+Language: C
 
 Platform: XINU OS
 
